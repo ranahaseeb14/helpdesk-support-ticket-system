@@ -4,6 +4,9 @@ const jwt = require("jsonwebtoken")
 
 const register = async (req, res, next) => {
     try {
+        if (!req.body || !req.body.email) {
+            return res.status(400).json({ msg: 'Request body is missing or invalid' })
+        }
         const { name, email, password, role } = req.body
         const existingUser = await userModel.findOne({ email })
         if (existingUser) {
@@ -29,6 +32,9 @@ const register = async (req, res, next) => {
 }
 const login = async (req, res, next) => {
     try {
+        if (!req.body || !req.body.email) {
+            return res.status(400).json({ msg: 'Request body is missing or invalid' })
+        }
         const { email, password } = req.body
         const existingUser = await userModel.findOne({ email }).select('+password')
         if (!existingUser) {
