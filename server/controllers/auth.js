@@ -97,6 +97,11 @@ const changeRole = async (req, res, next) => {
             return res.status(403).json({ msg: 'Not authorized to change the role of users' })
         }
         const { id: userId } = req.params
+
+        if (userId === req.user.id) {
+            return res.status(403).json({ msg: "You cannot change your own role" })
+        }
+
         const user = await userModel.findById(userId)
         if (!user) {
             return res.status(404).json({ msg: 'User not found' })

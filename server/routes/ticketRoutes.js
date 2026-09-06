@@ -2,7 +2,7 @@ const express = require("express")
 
 const router = express.Router()
 
-const { createTicket, getAllTickets, getSingleTicket, assignTicket, updateTicketStatus, getStatusHistory, reopenTicket, getdashboardStats, updateTicketPriority } = require("../controllers/ticket")
+const { createTicket, getAllTickets, getSingleTicket, assignTicket, updateTicketStatus, getStatusHistory, reopenTicket, getdashboardStats, updateTicketPriority, updateTicket } = require("../controllers/ticket")
 
 const { addComment, getCommentsbyTicket, deleteComment } = require("../controllers/comment")
 
@@ -17,6 +17,7 @@ router.get('/tickets/dashboard', protect, getdashboardStats)
 router.get('/tickets/:id', protect, getSingleTicket)
 
 router.patch('/tickets/:id/assign', protect, assignTicket)
+
 
 router.patch('/tickets/:id/status', protect, updateTicketStatus)
 
@@ -34,5 +35,7 @@ router.post('/tickets/:id/comments', protect, addComment)
 router.get('/tickets/:id/comments', protect, getCommentsbyTicket)
 
 router.delete('/tickets/:id/comments', protect, deleteComment)
+
+router.patch('/tickets/:id', protect, updateTicket)
 
 module.exports = router

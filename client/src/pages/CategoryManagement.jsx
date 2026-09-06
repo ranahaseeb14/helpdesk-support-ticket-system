@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Form, Button, Table, Spinner, Card } from 'react-bootstrap'
+import { Form, Button, Table, Spinner, Card, Modal } from 'react-bootstrap'
 import Layout from '../components/Layout'
 import { AnimatePresence, motion } from 'framer-motion'
 import { BsChevronDown, BsChevronUp } from 'react-icons/bs'
@@ -7,10 +7,22 @@ import { theme } from '../theme'
 import api from '../api/axios'
 
 function CategoryManagement() {
+    const [showEditModal, setShowEditModal] = useState(false)
+    const [editingCategory, setEditingCategory] = useState(null)
+    const [editForm, setEditForm] = useState({ name: '', description: '' })
+    const [editError, setEditError] = useState('')
     const [category, setCategory] = useState([])
     const [categoryName, setCategoryName] = useState("")
+    const [categoryDescription, setCategoryDescription] = useState("")
     const [loading, setLoading] = useState(true)
     const [expanded, setExpanded] = useState(false)
+
+    function openEditModal(category) {
+        setEditingCategory(category)
+        setEditForm({ name: category.name, description: category.description || '' })
+        setEditError('')
+        setShowEditModal(true)
+    }
 
     async function fetchCategory() {
         try {
@@ -30,21 +42,22 @@ function CategoryManagement() {
         e.preventDefault()
         try {
             const token = localStorage.getItem('token')
-            const res = await api.post(`/api/categories`, { name: categoryName }, {
+            const res = await api.post(`/api/categories`, { name: categoryName, description: categoryDescription }, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             setCategoryName("")
+            setCategoryDescription("")
             fetchCategory()
         } catch (error) {
             console.log(error)
         }
     }
-    async function handleDeleteCategory(id) {
-        const isConfirmed = window.confirm("Are you sure you want to delete this category?")
+    async function handleDeactivateCategory(id) {
+        const isConfirmed = window.confirm("Deactivate this category?")
         if (!isConfirmed) return
         try {
             const token = localStorage.getItem('token')
-            const res = await api.delete(`/api/categories/${id}`, {
+            const res = await api.patch(`/api/categories/${id}/deactivate`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             fetchCategory()
@@ -55,6 +68,21 @@ function CategoryManagement() {
             )
         }
     }
+
+    async function handleUpdateCategory(e) {
+        e.preventDefault()
+        try {
+            const token = localStorage.getItem('token')
+            await api.patch(`/api/categories/${editingCategory._id}`, editForm, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            setShowEditModal(false)
+            fetchCategory()
+        } catch (error) {
+            setEditError(error.response?.data?.msg || "Something went wrong")
+        }
+    }
+
     useEffect(() => {
         fetchCategory()
     }, [])
@@ -82,6 +110,13 @@ function CategoryManagement() {
                                         padding: '10px 16px',
                                         fontSize: '14px'
                                     }}
+                                />
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Category description (optional)"
+                                    value={categoryDescription}
+                                    onChange={(e) => setCategoryDescription(e.target.value)}
+                                    style={{ borderRadius: '10px' }}
                                 />
                                 <Button
                                     type="submit"
@@ -126,6 +161,7 @@ function CategoryManagement() {
                                             <thead>
                                                 <tr style={{ color: theme.textMuted, fontSize: '13px' }}>
                                                     <th>Category Name</th>
+                                                    <th>Edit</th>
                                                     <th>Action</th>
                                                 </tr>
                                             </thead>
@@ -139,25 +175,48 @@ function CategoryManagement() {
                                                         return (
                                                             <motion.tr
                                                                 key={myCategories._id}
+                                                                style={{ opacity: myCategories.isActive ? 1 : 0.5 }}
                                                                 initial={{ opacity: 0 }}
                                                                 animate={{ opacity: 1 }}
                                                                 transition={{ delay: index * 0.05 }}
                                                             >
                                                                 <td style={{ color: theme.primary, fontWeight: 500 }}>{myCategories.name}</td>
                                                                 <td>
-                                                                    <motion.span whileHover={{ scale: 1.05 }} style={{ display: 'inline-block' }}>
-                                                                        <Button
-                                                                            onClick={() => handleDeleteCategory(myCategories._id)}
-                                                                            style={{
-                                                                                backgroundColor: '#fee2e2',
-                                                                                color: '#991b1b',
-                                                                                border: 'none',
-                                                                                borderRadius: '8px',
-                                                                                padding: '5px 14px',
-                                                                                fontSize: '13px',
-                                                                                fontWeight: 500
-                                                                            }}>Delete</Button>
-                                                                    </motion.span>
+                                                                    {myCategories.isActive ? (
+                                                                        <>
+                                                                            <motion.span whileHover={{ scale: 1.05 }} style={{ display: 'inline-block' }}>
+                                                                                <Button
+                                                                                    onClick={() => openEditModal(myCategories)}
+                                                                                    variant="outline-secondary"
+                                                                                    size="sm"
+                                                                                    style={{ borderRadius: '8px' }}
+                                                                                >
+                                                                                    Edit
+                                                                                </Button>
+                                                                            </motion.span>
+                                                                        </>
+                                                                    ) : (
+                                                                        <span style={{ color: theme.textMuted, fontSize: '13px' }}>Cannot Edit</span>
+                                                                    )}
+                                                                </td>
+                                                                <td>
+                                                                    {myCategories.isActive ? (
+                                                                        <motion.span whileHover={{ scale: 1.05 }} style={{ display: 'inline-block' }}>
+                                                                            <Button
+                                                                                onClick={() => handleDeactivateCategory(myCategories._id)}
+                                                                                style={{
+                                                                                    backgroundColor: '#fee2e2',
+                                                                                    color: '#991b1b',
+                                                                                    border: 'none',
+                                                                                    borderRadius: '8px',
+                                                                                    padding: '5px 14px',
+                                                                                    fontSize: '13px',
+                                                                                    fontWeight: 500
+                                                                                }}>Deactivate</Button>
+                                                                        </motion.span>
+                                                                    ) : (
+                                                                        <span style={{ color: theme.textMuted, fontSize: '13px' }}>Deactivated</span>
+                                                                    )}
                                                                 </td>
                                                             </motion.tr>
                                                         )
@@ -165,6 +224,37 @@ function CategoryManagement() {
                                                 )}
                                             </tbody>
                                         </Table>
+                                        <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
+                                            <Modal.Header closeButton>
+                                                <Modal.Title style={{ color: theme.primary, fontSize: '18px' }}>Edit Category</Modal.Title>
+                                            </Modal.Header>
+                                            <Modal.Body>
+                                                <Form onSubmit={handleUpdateCategory}>
+                                                    <Form.Group className="mb-3">
+                                                        <Form.Label>Name</Form.Label>
+                                                        <Form.Control
+                                                            value={editForm.name}
+                                                            onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                                                            style={{ borderRadius: '8px' }}
+                                                        />
+                                                    </Form.Group>
+                                                    <Form.Group className="mb-3">
+                                                        <Form.Label>Description</Form.Label>
+                                                        <Form.Control
+                                                            as="textarea"
+                                                            rows={3}
+                                                            value={editForm.description}
+                                                            onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                                                            style={{ borderRadius: '8px' }}
+                                                        />
+                                                    </Form.Group>
+                                                    {editError && <p className="text-danger" style={{ fontSize: '13px' }}>{editError}</p>}
+                                                    <Button type="submit" style={{ backgroundColor: theme.accent, border: 'none', borderRadius: '8px' }}>
+                                                        Save Changes
+                                                    </Button>
+                                                </Form>
+                                            </Modal.Body>
+                                        </Modal>
                                     </motion.div>
                                 )}
                             </AnimatePresence>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Card, Badge, Spinner } from 'react-bootstrap'
+import { Card, Badge, Spinner, Modal, Button, Form } from 'react-bootstrap'
 import { motion } from 'framer-motion'
 import api from '../api/axios'
 import { useAuth } from '../context/AuthContext'
@@ -15,9 +15,18 @@ function TicketDetail() {
     const { id } = useParams()
     const [ticket, setTicket] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [showEditModal, setShowEditModal] = useState(false)
+    const [editForm, setEditForm] = useState({ title: '', description: '', priority: '' })
 
     const statusStyle = getStatusStyle(ticket?.status)
     const priorityStyle = getPriorityStyle(ticket?.priority)
+
+    function openEditModal() {
+        setEditForm({ title: ticket.title, description: ticket.description, priority: ticket.priority })
+        setShowEditModal(true)
+    }
+
+
     async function fetchTicket() {
         try {
             setLoading(true)
@@ -32,6 +41,21 @@ function TicketDetail() {
             setLoading(false)
         }
     }
+
+    async function handleUpdateTicket(e) {
+        e.preventDefault()
+        try {
+            const token = localStorage.getItem('token')
+            await api.patch(`/api/tickets/${id}`, editForm, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            setShowEditModal(false)
+            fetchTicket()
+        } catch (error) {
+            alert(error.response?.data?.msg || "Something went wrong")
+        }
+    }
+
     useEffect(() => {
         fetchTicket()
     }, [id])
@@ -49,6 +73,13 @@ function TicketDetail() {
                                 <div>
                                     <h3>{ticket.ticketNo}</h3>
                                     <h5 className="text-muted">{ticket.title}</h5>
+                                </div>
+                                <div>
+                                    {ticket.requester === user._id && ticket.status !== 'Closed' && (
+                                        <Button size="sm" variant="outline-secondary" onClick={openEditModal} className="mt-2">
+                                            Edit Ticket
+                                        </Button>
+                                    )}
                                 </div>
                                 <div className="d-flex gap-2">
                                     <motion.div key={ticket.status} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
@@ -91,6 +122,34 @@ function TicketDetail() {
                     ) : null}
                 </>
             )}
+            <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Edit Ticket</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={handleUpdateTicket}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Title</Form.Label>
+                            <Form.Control
+                                value={editForm.title}
+                                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Description</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={3}
+                                value={editForm.description}
+                                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                            />
+                        </Form.Group>
+                        <Button type="submit" style={{ backgroundColor: theme.accent, border: 'none' }}>
+                            Save Changes
+                        </Button>
+                    </Form>
+                </Modal.Body>
+            </Modal>
         </Layout>
     )
 }

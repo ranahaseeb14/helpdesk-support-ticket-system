@@ -28,7 +28,7 @@ function CreateTickets() {
         try {
             setLoading(true)
             const token = localStorage.getItem('token')
-            const res = await api.get(`/api/categories`, {
+            const res = await api.get(`/api/categories/active`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             setCategories(res.data.categories)

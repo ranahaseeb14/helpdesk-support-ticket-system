@@ -327,6 +327,45 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Update Ticket",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\":\"Mailbox Full - Updated\",\r\n    \"description\":\"Updated description of the issue\",\r\n    \"priority\":\"High\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -481,7 +520,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"name\":\"Security\"\r\n}",
+              "raw": "{\r\n    \"name\":\"Security\",\r\n    \"description\":\"Access cards, locks, alarms, and related security equipment\"\r\n}",
               "options": {
                 "raw": {
                   "language": "text"
@@ -516,7 +555,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"name\":\"Furniture\"\r\n}",
+              "raw": "{\r\n    \"name\":\"Furniture\",\r\n    \"description\":\"Desks, chairs, cabinets, and other office furniture\"\r\n}",
               "options": {
                 "raw": {
                   "language": "text"
@@ -544,12 +583,12 @@
           "response": []
         },
         {
-          "name": "Delete Category",
+          "name": "Deactivate Category",
           "request": {
             "auth": {
               "type": "noauth"
             },
-            "method": "DELETE",
+            "method": "PATCH",
             "header": [
               {
                 "key": "Authorization",
@@ -558,28 +597,53 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"name\":\"Furniture\"\r\n}",
+              "raw": "",
               "options": {
                 "raw": {
-                  "language": "text"
+                  "language": "json"
                 }
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/categories/:id",
+              "raw": "{{baseUrl}}/api/categories/:id/deactivate",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "categories",
-                ":id"
+                ":id",
+                "deactivate"
               ],
               "variable": [
                 {
                   "key": "id",
                   "value": ""
                 }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Active Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/active",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories",
+                "active"
               ]
             }
           },

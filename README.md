@@ -4,7 +4,7 @@ A full-stack MERN Helpdesk & Support Ticket System where users can report suppor
 
 ## Live Application
 
-- Frontend: [https://helpdesk-frontend-weld.vercel.app/](https://helpdesk-frontend-weld.vercel.app/)
+- Frontend: [https://helpdesk-support-ticket-system.vercel.app/](https://helpdesk-support-ticket-system.vercel.app/)
 - Backend API: [https://helpdesk-backend-8s6x.onrender.com](https://helpdesk-backend-8s6x.onrender.com)
 
 > The backend is hosted on Render's free tier. If it has been inactive, the first request may take 30–60 seconds while the service wakes up.
@@ -15,6 +15,7 @@ A full-stack MERN Helpdesk & Support Ticket System where users can report suppor
 - JWT-based authentication
 - Role-based authorization for Requesters, Agents, and Admins
 - Ticket creation, assignment, status updates, resolution, closure, and reopening
+- Ticket editing (title, description, category, priority, due date)
 - Strict ticket workflow:
   `Open → Assigned → In Progress → Resolved → Closed`
 - Resolution note required before a ticket can be marked as resolved
@@ -22,8 +23,9 @@ A full-stack MERN Helpdesk & Support Ticket System where users can report suppor
 - Internal comments that are visible only to Agents and Admins
 - Ticket status history/audit trail
 - Dashboard statistics: total, open, resolved, overdue, and priority breakdown
-- Category management
+- Category management, including a description field, editing categories, and deactivating categories instead of deleting them
 - Admin user-role management
+- An owner-protected admin account whose role cannot be changed by anyone, and a rule preventing any admin from changing their own role
 - Backend filtering and pagination for ticket lists
 - Centralized backend error handling
 - AuthContext for shared frontend authentication state
@@ -79,6 +81,13 @@ helpdesk-support-ticket-system/
 │   ├── server.js
 │   └── package.json
 │
+├── docs/
+│   └── schema-diagram.md
+│
+├── postman/
+│   └── helpdesk-support-ticket-system.postman_collection.json
+│
+├── .gitignore
 └── README.md
 ```
 
@@ -93,7 +102,7 @@ helpdesk-support-ticket-system/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/helpdesk-support-ticket-system.git
+git clone https://github.com/ranahaseeb14/helpdesk-support-ticket-system.git
 cd helpdesk-support-ticket-system
 ```
 
@@ -156,6 +165,7 @@ The Vite development server will display the local frontend URL, usually `http:/
 - Requesters cannot see internal staff comments.
 - Ticket status transitions are validated on the server and cannot be skipped through a direct API request.
 - Only a Requester or Admin can reopen a closed ticket.
+- Categories cannot be deleted if they are still attached to a ticket; they can only be deactivated.
 - MongoDB indexes support common ticket lookups, such as by requester, assigned agent, status, and due date.
 
 ## Demo Accounts
@@ -164,9 +174,9 @@ The Vite development server will display the local frontend URL, usually `http:/
 
 | Role | Email | Password |
 |---|---|---|
-| Admin | `replace-with-demo-admin-email` | `replace-with-demo-admin-password` |
-| Requester | `replace-with-demo-requester-email` | `replace-with-demo-requester-password` |
-| Agent | `replace-with-demo-agent-email` | `replace-with-demo-agent-password` |
+| Admin | `admindemo@gmail.com` | `admindemo` |
+| Requester | `requesterdemo@gmail.com` | `requesterdemo` |
+| Agent | `agentdemo@gmail.com` | `agentdemo` |
 
 ## Deployment
 

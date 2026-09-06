@@ -118,6 +118,42 @@ const assignTicket = async (req, res, next) => {
     }
 }
 
+const updateTicket = async (req, res, next) => {
+    try {
+        const { id: ticketId } = req.params
+        const ticket = await ticketModel.findById(ticketId)
+        if (!ticket) {
+            return res.status(404).json({ msg: "Ticket not found" })
+        }
+
+        const isRequester = ticket.requester.toString() === req.user.id
+        const isAdmin = req.user.role === 'admin'
+
+        if (!isRequester && !isAdmin) {
+            return res.status(403).json({ msg: "Not authorized to edit this ticket" })
+        }
+
+        if (ticket.status === 'Closed') {
+            return res.status(400).json({ msg: "Closed tickets cannot be edited" })
+        }
+
+        const { title, description, category, priority, dueDate } = req.body
+
+        if (title) ticket.title = title
+        if (description) ticket.description = description
+        if (category) ticket.category = category
+        if (priority) ticket.priority = priority
+        if (dueDate) ticket.dueDate = dueDate
+
+        await ticket.save()
+
+        return res.status(200).json({ msg: "Ticket updated successfully", ticket })
+
+    } catch (error) {
+        next(error)
+    }
+}
+
 const updateTicketStatus = async (req, res, next) => {
     try {
 
@@ -288,4 +324,4 @@ const getdashboardStats = async (req, res, next) => {
     }
 }
 
-module.exports = { createTicket, getAllTickets, getSingleTicket, assignTicket, updateTicketStatus, getStatusHistory, updateTicketPriority, reopenTicket, getdashboardStats }
+module.exports = { createTicket, getAllTickets, getSingleTicket, assignTicket, updateTicket, updateTicketStatus, getStatusHistory, updateTicketPriority, reopenTicket, getdashboardStats }

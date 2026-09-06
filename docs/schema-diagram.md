@@ -12,6 +12,8 @@ erDiagram
     CATEGORY {
         ObjectId _id
         string name
+        string description
+        boolean isActive
     }
 
     TICKET {

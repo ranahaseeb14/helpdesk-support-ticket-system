@@ -5,10 +5,21 @@ import Layout from '../components/Layout'
 import { motion } from 'framer-motion'
 import { theme } from '../theme'
 import api from '../api/axios'
+import { useAuth } from '../context/AuthContext'
 
 function ManageUsers() {
+    const { user: currentUser } = useAuth()
     const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(true)
+
+    function getSortPriority(u) {
+        if (u._id === currentUser._id) return 0
+        if (u.isOwner) return 1
+        return 2
+    }
+
+    const sortedUsers = [...users].sort((a, b) => getSortPriority(a) - getSortPriority(b))
+
     async function fetchUsers() {
         try {
             setLoading(true)
@@ -63,7 +74,7 @@ function ManageUsers() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {users.map((myUsers, index) => {
+                                    {sortedUsers.map((myUsers, index) => {
                                         const roleStyle = getRoleStyle(myUsers.role)
                                         return (
                                             <motion.tr key={myUsers._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: index * 0.05 }}>
@@ -76,7 +87,9 @@ function ManageUsers() {
                                                 </td>
                                                 <td>
                                                     {myUsers.isOwner ? (
-                                                        <span style={{ color: theme.textMuted, fontSize: '13px' }}>Protected</span>
+                                                        <span style={{ color: theme.textMuted, fontSize: '13px' }}>Protected (isOwner)</span>
+                                                    ) : myUsers._id === currentUser._id ? (
+                                                        <span style={{ color: theme.textMuted, fontSize: '13px' }}>This is you</span>
                                                     ) : (
                                                         <Form.Select onChange={(e) => handleRoleChange(myUsers._id, e.target.value)} defaultValue="" size="sm" style={{ borderRadius: '8px', maxWidth: '160px' }}>
                                                             <option value="" disabled>Change Role</option>
