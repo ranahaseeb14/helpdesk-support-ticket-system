@@ -75,12 +75,16 @@ function ManageUsers() {
                                                     </Badge>
                                                 </td>
                                                 <td>
-                                                    <Form.Select onChange={(e) => handleRoleChange(myUsers._id, e.target.value)} defaultValue="" size="sm" style={{ borderRadius: '8px', maxWidth: '160px' }}>
-                                                        <option value="" disabled>Change Role</option>
-                                                        <option value="requester">Requester</option>
-                                                        <option value="agent">Agent</option>
-                                                        <option value="admin">Admin</option>
-                                                    </Form.Select>
+                                                    {myUsers.isOwner ? (
+                                                        <span style={{ color: theme.textMuted, fontSize: '13px' }}>Protected</span>
+                                                    ) : (
+                                                        <Form.Select onChange={(e) => handleRoleChange(myUsers._id, e.target.value)} defaultValue="" size="sm" style={{ borderRadius: '8px', maxWidth: '160px' }}>
+                                                            <option value="" disabled>Change Role</option>
+                                                            <option value="requester">Requester</option>
+                                                            <option value="agent">Agent</option>
+                                                            <option value="admin">Admin</option>
+                                                        </Form.Select>
+                                                    )}
                                                 </td>
                                             </motion.tr>
                                         )

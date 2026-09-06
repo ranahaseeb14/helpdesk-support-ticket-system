@@ -82,7 +82,7 @@ const getAllUsers = async (req, res, next) => {
         if (req.user.role !== 'admin') {
             return res.status(403).json({ msg: 'Not Authorized' })
         }
-        const users = await userModel.find().select('name email role isActive')
+        const users = await userModel.find().select('name email role isActive isOwner')
         res.status(200).json({ users })
     } catch (error) {
         next(error)
@@ -91,16 +91,20 @@ const getAllUsers = async (req, res, next) => {
 
 const changeRole = async (req, res, next) => {
     try {
-        const { role: newRole } = req.body
-        const user = await userModel.findById(req.params.id)
-        if (!user) {
-            return res.status(404).json({ msg: 'User not found' })
-        }
         const isAdmin = req.user.role === 'admin'
 
         if (!isAdmin) {
             return res.status(403).json({ msg: 'Not authorized to change the role of users' })
         }
+        const { id: userId } = req.params
+        const user = await userModel.findById(userId)
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' })
+        }
+        if (user.isOwner) {
+            return res.status(403).json({ msg: "This user's role cannot be changed" })
+        }
+        const { role: newRole } = req.body
         const validRoles = ['requester', 'agent', 'admin']
         const currentRole = user.role
         if (!validRoles.includes(newRole)) {

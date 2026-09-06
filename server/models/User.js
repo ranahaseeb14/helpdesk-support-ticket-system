@@ -28,6 +28,10 @@ const userSchema = new mongoose.Schema(
             type: Boolean,
             default: true,
         },
+        isOwner: {
+            type: Boolean,
+            default: false,
+        },
     }, { timestamps: true })
 
 userSchema.index({ role: 1, isActive: 1 })
