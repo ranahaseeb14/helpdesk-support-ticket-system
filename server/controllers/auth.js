@@ -71,6 +71,9 @@ const login = async (req, res, next) => {
 
 const getActiveAgents = async (req, res, next) => {
     try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ msg: 'Not Authorized' })
+        }
         const agents = await userModel.find({ isActive: true, role: 'agent' }).select('name email')
         res.status(200).json({ agents })
     } catch (error) {

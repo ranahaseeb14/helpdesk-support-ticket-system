@@ -14,7 +14,7 @@ const createTicket = async (req, res, next) => {
         const counter = await Counter.findOneAndUpdate(
             { name: 'ticketNo' },
             { $inc: { seq: 1 } },
-            { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true }
+            { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true, $setOnInsert: { seq: 1000 } }
         )
         const newTicketNo = `TKT-${counter.seq}`
 
