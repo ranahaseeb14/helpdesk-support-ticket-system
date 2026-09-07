@@ -11,11 +11,16 @@ const createTicket = async (req, res, next) => {
         if (!categoryExists) {
             return res.status(400).json({ msg: "Invalid Category" })
         }
-        const counter = await Counter.findOneAndUpdate(
-            { name: 'ticketNo' },
-            { $inc: { seq: 1 } },
-            { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true, $setOnInsert: { seq: 1000 } }
-        )
+        let counter = await Counter.findOne({ name: 'ticketNo' })
+        if (!counter) {
+            counter = await Counter.create({ name: 'ticketNo', seq: 1001 })
+        } else {
+            counter = await Counter.findOneAndUpdate(
+                { name: 'ticketNo' },
+                { $inc: { seq: 1 } },
+                { returnDocument: 'after' }
+            )
+        }
         const newTicketNo = `TKT-${counter.seq}`
 
         const newTicket = await ticketModel.create({
